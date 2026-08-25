@@ -50,3 +50,16 @@ TECHNICAL CONTEXT & REASONING:
 - Localized target window OCR avoids wasting compute on full 108,000 video frames.
 - Applies image preprocessing to maximize OCR accuracy on compressed video subtitles.
 ================================================================================
+
+================================================================================
+STEP 5: Main CLI Orchestrator & Frame Output (main.py)
+Date/Time: 2026-08-25 14:09 IST
+Prompt Intent: Build main entrypoint CLI script to coordinate downloader, audio aligner, and OCR matcher, and output formatted timestamp, frame number, dialogue text, and saved frame image.
+--------------------------------------------------------------------------------
+USER PROMPT:
+"Proceed with Step 5. Implement main.py to tie together the downloader, audio aligner, and OCR matcher into a unified command line tool, outputting the required format and saving output_frame.png."
+
+TECHNICAL CONTEXT & REASONING:
+- Provides clean CLI flags (--url and --target_text).
+- Orchestrates primary audio alignment + visual OCR verification + frame extraction.
+================================================================================
