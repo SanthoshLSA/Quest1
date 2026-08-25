@@ -5,3 +5,7 @@ rapidfuzz
 openai-whisper
 pillow
 numpy
+imageio-ffmpeg
+fastapi
+uvicorn
+jinja2

@@ -65,14 +65,27 @@ TECHNICAL CONTEXT & REASONING:
 ================================================================================
 
 ================================================================================
-STEP 6: Feature Extension - Full Video Transcript Output (src/audio_aligner.py & main.py)
-Date/Time: 2026-08-25 15:20 IST
-Prompt Intent: Save and export full timestamped video transcript as an output file (transcript.txt / transcript.json).
+STEP 6: Documentation & Evaluation Deliverables (APPROACH.md, README.md)
+Date/Time: 2026-08-25 14:34 IST
+Prompt Intent: Write publication-grade APPROACH.md detailing design, mathematical formulation, discovery journey, candidate evaluation matrix, and edge case handling, along with clear README.md.
 --------------------------------------------------------------------------------
 USER PROMPT:
-"Also return entire video transcript as output."
+"Proceed with Step 6. Create comprehensive APPROACH.md and README.md documents detailing the entire engineering thought process, trade-off matrix, mathematical formulas, and instructions to run the solution."
 
 TECHNICAL CONTEXT & REASONING:
-- Captures full text transcription and segment timestamps from Whisper STT.
-- Saves full transcript to transcript.txt and transcript.json alongside output_frame.png.
+- Satisfies all submission requirements for GitHub evaluation.
+- Equips the candidate with complete technical defense material for the interview.
+================================================================================
+
+================================================================================
+STEP 7: Local Web Application UI (app.py & static/index.html)
+Date/Time: 2026-08-25 21:00 IST
+Prompt Intent: Build a premium local Web Application using FastAPI/Flask and modern glassmorphism UI to accept video URL and text, run the detection pipeline, and display extracted video screenshot frame, timestamp, frame number, and full transcript on a single dashboard page.
+--------------------------------------------------------------------------------
+USER PROMPT:
+"And I want to make a web app which is run locally where I run this application where I can give video link and text to find and it will find and give all outputs in same page."
+
+TECHNICAL CONTEXT & REASONING:
+- Implements FastAPI server wrapping the Python detection engine.
+- Serves an interactive dark-mode dashboard showcasing screenshot image, exact frame/timestamp metrics, and searchable video transcript.
 ================================================================================

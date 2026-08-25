@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dialogue Frame Finder AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0a0e17;
+            --card-bg: rgba(22, 28, 45, 0.7);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --accent-purple: #7c3aed;
+            --accent-cyan: #06b6d4;
+            --accent-gradient: linear-gradient(135deg, #7c3aed 0%, #06b6d4 100%);
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(124, 58, 237, 0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(6, 182, 212, 0.12) 0px, transparent 50%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 2rem 1rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        header p {
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+
+        .input-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+            margin-bottom: 2rem;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-group label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .form-group input {
+            background: rgba(10, 14, 23, 0.6);
+            border: 1px solid var(--card-border);
+            border-radius: 10px;
+            padding: 0.85rem 1rem;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .form-group input:focus {
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.2);
+        }
+
+        .btn-submit {
+            background: var(--accent-gradient);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 1rem 2rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: transform 0.2s, opacity 0.2s;
+        }
+
+        .btn-submit:hover {
+            opacity: 0.95;
+            transform: translateY(-2px);
+        }
+
+        .loading-container {
+            display: none;
+            text-align: center;
+            padding: 3rem;
+            background: var(--card-bg);
+            border-radius: 16px;
+            margin-bottom: 2rem;
+        }
+
+        .spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-left-color: var(--accent-cyan);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem auto;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .dashboard {
+            display: none;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 2rem;
+        }
+
+        @media (max-width: 900px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .output-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .output-card h2 {
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+            color: var(--accent-cyan);
+        }
+
+        .frame-preview-img {
+            width: 100%;
+            border-radius: 12px;
+            border: 1px solid var(--card-border);
+            margin-bottom: 1.5rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+        }
+
+        .metric-box {
+            background: rgba(10, 14, 23, 0.7);
+            border: 1px solid var(--card-border);
+            padding: 1rem;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .metric-box .value {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .metric-box .label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 0.25rem;
+        }
+
+        .transcript-box {
+            max-height: 480px;
+            overflow-y: auto;
+            padding-right: 0.5rem;
+        }
+
+        .transcript-item {
+            background: rgba(10, 14, 23, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.75rem;
+            display: flex;
+            gap: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .transcript-item.matched {
+            border-color: var(--accent-purple);
+            background: rgba(124, 58, 237, 0.15);
+        }
+
+        .transcript-item .ts {
+            color: var(--accent-cyan);
+            font-weight: 600;
+            font-family: monospace;
+            white-space: nowrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Dialogue Frame Finder AI</h1>
+            <p>Locate the exact video frame, timestamp, and visual text from any video URL</p>
+        </header>
+
+        <div class="input-card">
+            <form id="searchForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="url">Video URL (YouTube, ok.ru, Direct MP4)</label>
+                        <input type="url" id="url" required value="https://ok.ru/video/248244667877" placeholder="https://...">
+                    </div>
+                    <div class="form-group">
+                        <label for="text">Target Dialogue String</label>
+                        <input type="text" id="text" required value="My mind rebels at stagnation" placeholder="Enter quote or text...">
+                    </div>
+                </div>
+                <button type="submit" class="btn-submit" id="btnSubmit">Locate Dialogue Frame</button>
+            </form>
+        </div>
+
+        <div class="loading-container" id="loading">
+            <div class="spinner"></div>
+            <h3 style="margin-bottom: 0.5rem;">Analyzing Media Stream...</h3>
+            <p style="color: var(--text-secondary); font-size: 0.9rem;">Transcribing audio track and running visual OCR frame alignment</p>
+        </div>
+
+        <div class="dashboard" id="dashboard">
+            <div class="output-card">
+                <h2>Identified Video Frame Screenshot</h2>
+                <img id="frameImg" class="frame-preview-img" src="" alt="Identified Frame">
+
+                <div class="metrics-grid">
+                    <div class="metric-box">
+                        <div class="value" id="resTimestamp">00:05:25.160</div>
+                        <div class="label">Timestamp</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="value" id="resFrame">7797</div>
+                        <div class="label">Frame #</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="value" id="resMatch">Visual Match</div>
+                        <div class="label">Status</div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 1.5rem; background: rgba(10, 14, 23, 0.7); border: 1px solid var(--card-border); padding: 1rem; border-radius: 10px;">
+                    <div style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.3rem;">MATCHED DIALOGUE TEXT</div>
+                    <div id="resText" style="font-size: 1.05rem; font-weight: 600; color: #fde047;">"My mind reveals its stagnation."</div>
+                </div>
+            </div>
+
+            <div class="output-card">
+                <h2>Full Video Transcript</h2>
+                <div class="transcript-box" id="transcriptList">
+                    <!-- Dynamic transcript items loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('searchForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const url = document.getElementById('url').value;
+            const text = document.getElementById('text').value;
+
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('dashboard').style.display = 'none';
+
+            try {
+                const response = await fetch('/api/find_dialogue', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url, text })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    document.getElementById('frameImg').src = data.result.image_url + '?t=' + new Date().getTime();
+                    document.getElementById('resTimestamp').innerText = data.result.timestamp;
+                    document.getElementById('resFrame').innerText = '#' + data.result.frame;
+                    document.getElementById('resText').innerText = '"' + data.result.text + '"';
+
+                    // Load transcript
+                    const transcriptList = document.getElementById('transcriptList');
+                    transcriptList.innerHTML = '';
+
+                    data.result.transcript_segments.forEach(seg => {
+                        const item = document.createElement('div');
+                        item.className = 'transcript-item' + (seg.frame === data.result.frame ? ' matched' : '');
+                        item.innerHTML = `<span class="ts">${seg.timestamp}</span><span>${seg.text}</span>`;
+                        transcriptList.appendChild(item);
+                    });
+
+                    document.getElementById('dashboard').style.display = 'grid';
+                } else {
+                    alert('Error: ' + (data.error || 'Dialogue could not be located in video.'));
+                }
+            } catch (err) {
+                alert('Connection error: ' + err.message);
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
