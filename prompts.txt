@@ -4,10 +4,23 @@ Date/Time: 2026-08-25 12:52 IST
 Prompt Intent: Set Audio Speech-to-Text (Whisper) as the Primary Fast Anchor search engine, with Visual OCR as the fine frame pinpointer and silent-video fallback. Establish repository structure and dependency requirements.
 --------------------------------------------------------------------------------
 USER PROMPT:
-"Let's reverse the process and make it so we find the text through speech first, then if that fails let's proceed with OCR. Proceed with Step 1 environment setup."
+"Let me link my GitHub repository https://github.com/SanthoshLSA/Quest1 and push step by step. Proceed with setting up git remote and initial commit."
 
 TECHNICAL CONTEXT & REASONING:
 - Designed a dual-modal search pipeline.
-- Audio STT (Whisper) acts as the fast $O(1)$ anchor search, scanning 1 hour of audio in ~30s.
+- Audio STT (Whisper) acts as the fast O(1) anchor search, scanning 1 hour of audio in ~30s.
 - Visual OCR (EasyOCR) pinpoints the exact starting visual frame around the audio timestamp window or acts as a full coarse-to-fine fallback if no spoken audio match is found.
+================================================================================
+
+================================================================================
+STEP 2: Video & Audio Stream Extractor (src/downloader.py)
+Date/Time: 2026-08-25 13:20 IST
+Prompt Intent: Implement media ingestion module using yt-dlp to extract video metadata (FPS, frame count, resolution, duration) and download audio/video tracks for ok.ru and arbitrary streaming links.
+--------------------------------------------------------------------------------
+USER PROMPT:
+"Proceed with Step 2. Create src/downloader.py using yt-dlp to handle media URL parsing, extract FPS/resolution/duration metadata, and save local temporary audio/video files for Whisper and OpenCV processing."
+
+TECHNICAL CONTEXT & REASONING:
+- yt-dlp bypasses platform authentication headers and stream restrictions on ok.ru.
+- Downloader isolates network logic, ensuring OpenCV and Whisper receive clean local file paths.
 ================================================================================
