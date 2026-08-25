@@ -63,3 +63,16 @@ TECHNICAL CONTEXT & REASONING:
 - Provides clean CLI flags (--url and --target_text).
 - Orchestrates primary audio alignment + visual OCR verification + frame extraction.
 ================================================================================
+
+================================================================================
+STEP 6: Documentation & Evaluation Deliverables (APPROACH.md, README.md)
+Date/Time: 2026-08-25 14:34 IST
+Prompt Intent: Write publication-grade APPROACH.md detailing design, mathematical formulation, discovery journey, candidate evaluation matrix, and edge case handling, along with clear README.md.
+--------------------------------------------------------------------------------
+USER PROMPT:
+"Proceed with Step 6. Create comprehensive APPROACH.md and README.md documents detailing the entire engineering thought process, trade-off matrix, mathematical formulas, and instructions to run the solution."
+
+TECHNICAL CONTEXT & REASONING:
+- Satisfies all submission requirements for GitHub evaluation.
+- Equips the candidate with complete technical defense material for the interview.
+================================================================================
