@@ -24,3 +24,16 @@ TECHNICAL CONTEXT & REASONING:
 - yt-dlp bypasses platform authentication headers and stream restrictions on ok.ru.
 - Downloader isolates network logic, ensuring OpenCV and Whisper receive clean local file paths.
 ================================================================================
+
+================================================================================
+STEP 3: Primary Audio Alignment Engine (src/audio_aligner.py)
+Date/Time: 2026-08-25 13:30 IST
+Prompt Intent: Build Whisper audio speech-to-text module to transcribe audio and locate exact timestamp where target dialogue is spoken.
+--------------------------------------------------------------------------------
+USER PROMPT:
+"Proceed with Step 3. Implement src/audio_aligner.py using OpenAI Whisper to process the video audio track and search for the spoken phrase 'My mind rebels at stagnation', returning the exact start timestamp and corresponding video frame number."
+
+TECHNICAL CONTEXT & REASONING:
+- Fast O(1) temporal anchoring: Scans 54 minutes of audio in ~30 seconds.
+- Uses RapidFuzz token matching to locate phrase entry even under accent or acoustic variation.
+================================================================================
