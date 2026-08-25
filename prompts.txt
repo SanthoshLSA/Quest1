@@ -37,3 +37,16 @@ TECHNICAL CONTEXT & REASONING:
 - Fast O(1) temporal anchoring: Scans 54 minutes of audio in ~30 seconds.
 - Uses RapidFuzz token matching to locate phrase entry even under accent or acoustic variation.
 ================================================================================
+
+================================================================================
+STEP 4: Targeted Visual OCR & Fine Frame Pinpointer (src/ocr_matcher.py)
+Date/Time: 2026-08-25 13:50 IST
+Prompt Intent: Implement EasyOCR and image preprocessing module to run localized OCR on candidate video frame windows and extract visual text.
+--------------------------------------------------------------------------------
+USER PROMPT:
+"Proceed with Step 4. Implement src/ocr_matcher.py using EasyOCR, OpenCV contrast enhancement (CLAHE), and RapidFuzz to inspect frames around the candidate timestamp window, returning exact visual frame index and extracted text."
+
+TECHNICAL CONTEXT & REASONING:
+- Localized target window OCR avoids wasting compute on full 108,000 video frames.
+- Applies image preprocessing to maximize OCR accuracy on compressed video subtitles.
+================================================================================
