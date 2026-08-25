@@ -1,0 +1,7 @@
+opencv-python
+yt-dlp
+easyocr
+rapidfuzz
+openai-whisper
+pillow
+numpy

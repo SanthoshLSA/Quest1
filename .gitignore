@@ -1,0 +1,20 @@
+# Python bytecode & cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environments & Virtual Envs
+.venv/
+env/
+venv/
+
+# Downloaded temporary media & caches
+downloads/
+*.mp4
+*.mp3
+*.wav
+
+# System / IDE files
+.DS_Store
+.vscode/
+.idea/
