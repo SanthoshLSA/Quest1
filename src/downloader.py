@@ -283,11 +283,15 @@ class MediaDownloader:
         ffmpeg_exe = _get_ffmpeg()
         os.makedirs(self.download_dir, exist_ok=True)
 
-        if os.path.isfile(output_clip_path):
-            try:
-                os.remove(output_clip_path)
-            except Exception:
-                pass
+        # Clean up any existing output_clip files and name variants
+        parent_dir = os.path.dirname(os.path.abspath(output_clip_path))
+        base_name = os.path.basename(output_clip_path)
+        for fname in os.listdir(parent_dir):
+            if fname.startswith(base_name) and os.path.isfile(os.path.join(parent_dir, fname)):
+                try:
+                    os.remove(os.path.join(parent_dir, fname))
+                except Exception:
+                    pass
 
         if os.path.isfile(url):
             print(f"[*] Trimming 6s clip from local file: {url}")
@@ -352,9 +356,48 @@ class MediaDownloader:
         try:
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                 ydl.extract_info(url, download=True)
-            print(f"[+] Maximum resolution 6s clip saved to: {output_clip_path}")
+            print(f"[+] yt-dlp download finished.")
         except Exception as e:
-            print(f"[!] Partial download notice: {e}. Trimming from local low-res file...")
+            print(f"[!] Partial download notice: {e}")
+
+        # Check if the output file exists at the exact path
+        if not os.path.isfile(output_clip_path):
+            # Check for name variants (like output_clip.mp4.webm, output_clip.mp4.mkv, etc.)
+            candidates = []
+            for entry in os.listdir(parent_dir):
+                if entry.startswith(base_name) and entry != base_name:
+                    full_p = os.path.join(parent_dir, entry)
+                    if os.path.isfile(full_p) and not entry.endswith('.part') and not entry.endswith('.ytdl'):
+                        candidates.append(full_p)
+            
+            if candidates:
+                downloaded_file = max(candidates, key=os.path.getsize)
+                print(f"[+] Found downloaded high-quality clip variant: {downloaded_file}")
+                print(f"[*] Re-encoding high-quality clip to H.264/AAC MP4 for browser display & frame extraction...")
+                cmd = [
+                    ffmpeg_exe, "-y",
+                    "-i", downloaded_file,
+                    "-c:v", "libx264",
+                    "-pix_fmt", "yuv420p",
+                    "-preset", "fast",
+                    "-crf", "20",
+                    "-c:a", "aac",
+                    output_clip_path
+                ]
+                res = subprocess.run(cmd, capture_output=True, text=True)
+                if res.returncode == 0 and os.path.exists(output_clip_path):
+                    print(f"[+] Re-encoded successfully to {output_clip_path}")
+                    try:
+                        os.remove(downloaded_file)
+                    except Exception:
+                        pass
+                else:
+                    print(f"[!] Re-encoding failed: {res.stderr[-200:]}. Falling back to copying.")
+                    shutil.copy2(downloaded_file, output_clip_path)
+
+        # Fallback to local trim if no high quality clip was generated
+        if not os.path.exists(output_clip_path):
+            print(f"[!] High-quality clip not found. Trimming from local low-res file...")
             input_vid = os.path.join(self.download_dir, "input_video.mp4")
             if os.path.exists(input_vid):
                 cmd = [

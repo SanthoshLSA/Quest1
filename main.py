@@ -142,10 +142,13 @@ def find_dialogue_frame(video_url, target_text, output_img="output_frame.png", t
         update_progress(97, f"Extracting high-resolution screenshot frame #{final_result['frame']}...")
         # Calculate offset timestamp in HQ clip: relative_sec = center_sec - start_sec
         relative_sec = max(0.0, center_sec - start_sec)
-        hq_frame_index = int(round(relative_sec * fps))
-        
         # Extract screenshot frame directly from high-quality downloaded clip if valid
         if os.path.exists(clip_path) and os.path.getsize(clip_path) > 1024:
+            cap_clip = cv2.VideoCapture(clip_path)
+            clip_fps = cap_clip.get(cv2.CAP_PROP_FPS) or fps
+            cap_clip.release()
+            
+            hq_frame_index = int(round(relative_sec * clip_fps))
             extract_and_save_frame(clip_path, hq_frame_index, output_img)
         else:
             extract_and_save_frame(video_path, final_result["frame"], output_img)
