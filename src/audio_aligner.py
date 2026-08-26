@@ -1,4 +1,4 @@
-﻿"""
+"""
 audio_aligner.py
 Transcribes video/audio and finds the exact timestamp where spoken dialogue appears.
 Uses faster-whisper (CTranslate2 engine) for 4-8x faster transcription vs openai-whisper.
@@ -52,10 +52,7 @@ def _try_load_openai_whisper(model_size):
 
 class AudioAligner:
     def __init__(self, model_size="tiny"):
-        model, backend = _try_load_faster_whisper(model_size)
-        if model is None:
-            print("[!] faster-whisper not found, falling back to openai-whisper...")
-            model, backend = _try_load_openai_whisper(model_size)
+        model, backend = _try_load_openai_whisper(model_size)
         self.model = model
         self.backend = backend
         self.model_size = model_size
