@@ -151,16 +151,26 @@ class MediaDownloader:
                             pass
 
                 print(f"[*] Downloading via yt-dlp: {url}")
+                last_pct = -1
+                last_reported_mb = -1.0
 
                 def ytdlp_progress_hook(d):
+                    nonlocal last_pct, last_reported_mb
                     if progress_callback and d.get('status') == 'downloading':
                         total = d.get('total_bytes') or d.get('total_bytes_estimate') or 0
                         downloaded = d.get('downloaded_bytes', 0)
+                        mb_done = downloaded / (1024 * 1024)
                         if total > 0:
                             pct = int(10 + (downloaded / total) * 15) # 10% to 25% range
-                            mb_done = downloaded / (1024 * 1024)
-                            mb_total = total / (1024 * 1024)
-                            progress_callback(min(25, pct), f"Downloading media stream: {mb_done:.1f}MB / {mb_total:.1f}MB ({pct}%)")
+                            pct = min(25, pct)
+                            if pct != last_pct:
+                                last_pct = pct
+                                mb_total = total / (1024 * 1024)
+                                progress_callback(pct, f"Downloading media stream: {mb_done:.1f}MB / {mb_total:.1f}MB ({pct}%)")
+                        else:
+                            if mb_done - last_reported_mb >= 0.5:
+                                last_reported_mb = mb_done
+                                progress_callback(15, f"Downloading media stream: {mb_done:.1f}MB (unknown total)")
 
                 ydl_opts = {
                     'format': 'worstvideo[ext=mp4]+worstaudio[ext=m4a]/18/worst[ext=mp4]/worst',
