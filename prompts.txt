@@ -1,33 +1,11 @@
-STEP 1 - Project Setup & GitHub
---------------------------------
-Connect the GitHub repo https://github.com/SanthoshLSA/Quest1 and do the initial commit and push.
+﻿1. I want to build something that takes a video link and a line of dialogue as input, then tells me exactly where in the video that line appears — the frame number, timestamp, and a screenshot of that frame.
 
+2. What are the best ways to download an online video programmatically and pull out metadata like frame rate, total frames, resolution, and duration?
 
-STEP 2 - Video Downloader
---------------------------
-Build a module that takes any video URL, grabs the video and audio, and pulls out basic info like frame rate, total frames, video length, and resolution.
+3. What can I use to convert the audio from a video into a transcript with timestamps for each line?
 
+4. Once I know roughly which frame the dialogue appears at from the audio, I need to read the on-screen text from frames around that point to find the exact frame it shows up visually.
 
-STEP 3 - Find the Spoken Line
-------------------------------
-Use Whisper to listen through the video audio and find exactly when a specific line of dialogue is spoken. Return the time and the frame number it lands on.
+5. Build a web app around this — black and white UI, Ubuntu Mono terminal font. It takes a video link and dialogue text as input, shows live progress updates while the model is running, and outputs the full transcript, the matched dialogue line, a screenshot of the matching frame, the frame number, the timestamp, and the video frame rate.
 
-
-STEP 4 - Read Text from the Frame
------------------------------------
-Once we have the rough timestamp, look at the frames around it and use OCR to read any on-screen text. Find the exact frame where the dialogue appears visually.
-
-
-STEP 5 - Tie It All Together
-------------------------------
-Build the main script that runs everything in order: download, listen, find, confirm, and save the matching frame as an image.
-
-
-STEP 6 - Write the Docs
--------------------------
-Write a clear README explaining how to run the tool, and an APPROACH document explaining how the whole thing works and why it was built this way.
-
-
-STEP 7 - Web Dashboard
-------------------------
-Add a web interface where you paste a URL and a line of dialogue, hit go, and watch live progress updates as it searches. Show the result with the matching frame screenshot and a short video clip. Keep the design black and white, terminal style.
+6. The initial video download is too slow because it downloads the full video in high quality. Download it in low quality first just to find the dialogue, then go back and download only the short clip around that moment in high quality.
