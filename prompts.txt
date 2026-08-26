@@ -1,11 +1,13 @@
-﻿1. I want to build something that takes a video link and a line of dialogue as input, then tells me exactly where in the video that line appears — the frame number, timestamp, and a screenshot of that frame.
+1. I want to build something that takes a video link and a line of dialogue as input, then tells me exactly where in the video that line appears — the frame number, timestamp, and a screenshot of that frame.
 
-2. What are the best ways to download an online video programmatically and pull out metadata like frame rate, total frames, resolution, and duration?
+2. I want to document the whole process in an APPROACH.md file — what tech we used for each part of this, why we chose it over other options, and what the trade-offs were.
 
-3. What can I use to convert the audio from a video into a transcript with timestamps for each line?
+3. What are the best ways to download an online video programmatically and pull out metadata like frame rate, total frames, resolution, and duration?
 
-4. Once I know roughly which frame the dialogue appears at from the audio, I need to read the on-screen text from frames around that point to find the exact frame it shows up visually.
+4. What can I use to convert the audio from a video into a transcript with timestamps for each line?
 
-5. Build a web app around this — black and white UI, Ubuntu Mono terminal font. It takes a video link and dialogue text as input, shows live progress updates while the model is running, and outputs the full transcript, the matched dialogue line, a screenshot of the matching frame, the frame number, the timestamp, and the video frame rate.
+5. Once I know roughly which frame the dialogue appears at from the audio, I need to read the on-screen text from frames around that point to find the exact frame it shows up visually.
 
-6. The initial video download is too slow because it downloads the full video in high quality. Download it in low quality first just to find the dialogue, then go back and download only the short clip around that moment in high quality.
+6. Build a web app around this — black and white UI, Ubuntu Mono terminal font. It takes a video link and dialogue text as input, shows live progress updates while the model is running, and outputs the full transcript, the matched dialogue line, a screenshot of the matching frame, the frame number, the timestamp, and the video frame rate.
+
+7. The initial video download is too slow because it downloads the full video in high quality. Download it in low quality first just to find the dialogue, then go back and download only the short clip around that moment in high quality.
