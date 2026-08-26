@@ -3,68 +3,51 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dialogue Frame Finder AI</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <title>Dialogue Frame Finder</title>
+    <link href="https://fonts.googleapis.com/css2?family=Ubuntu+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --bg-dark: #0a0e17;
-            --card-bg: rgba(22, 28, 45, 0.7);
-            --card-border: rgba(255, 255, 255, 0.08);
-            --accent-purple: #7c3aed;
-            --accent-cyan: #06b6d4;
-            --accent-gradient: linear-gradient(135deg, #7c3aed 0%, #06b6d4 100%);
-            --text-primary: #f8fafc;
-            --text-secondary: #94a3b8;
-        }
-
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Inter', sans-serif;
+            font-family: 'Ubuntu Mono', monospace;
         }
 
         body {
-            background-color: var(--bg-dark);
-            background-image: 
-                radial-gradient(at 0% 0%, rgba(124, 58, 237, 0.15) 0px, transparent 50%),
-                radial-gradient(at 100% 100%, rgba(6, 182, 212, 0.12) 0px, transparent 50%);
-            color: var(--text-primary);
+            background-color: #000000;
+            color: #ffffff;
             min-height: 100vh;
-            padding: 2rem 1rem;
+            padding: 2rem 1.5rem;
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1100px;
             margin: 0 auto;
         }
 
         header {
-            text-align: center;
-            margin-bottom: 2.5rem;
+            border-bottom: 2px solid #ffffff;
+            padding-bottom: 1rem;
+            margin-bottom: 2rem;
         }
 
         header h1 {
-            font-size: 2.5rem;
+            font-size: 2rem;
             font-weight: 700;
-            background: var(--accent-gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
         header p {
-            color: var(--text-secondary);
-            font-size: 1rem;
+            color: #888888;
+            font-size: 0.95rem;
+            margin-top: 0.3rem;
         }
 
-        .input-card {
-            background: var(--card-bg);
-            backdrop-filter: blur(16px);
-            border: 1px solid var(--card-border);
-            border-radius: 16px;
-            padding: 2rem;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        .terminal-card {
+            background: #000000;
+            border: 1px solid #ffffff;
+            padding: 1.5rem;
             margin-bottom: 2rem;
         }
 
@@ -72,7 +55,51 @@
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .checkbox-row {
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
             margin-bottom: 1.5rem;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .checkbox-row input[type="checkbox"] {
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border: 1px solid #ffffff;
+            background: #000000;
+            cursor: pointer;
+            flex-shrink: 0;
+            position: relative;
+        }
+
+        .checkbox-row input[type="checkbox"]:checked::after {
+            content: 'X';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #ffffff;
+            font-family: 'Ubuntu Mono', monospace;
+        }
+
+        .checkbox-row label {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            cursor: pointer;
+        }
+
+        .checkbox-row .hint {
+            font-size: 0.78rem;
+            color: #666666;
+            margin-left: 0.2rem;
         }
 
         @media (max-width: 768px) {
@@ -88,67 +115,92 @@
         }
 
         .form-group label {
-            font-size: 0.875rem;
-            font-weight: 500;
-            color: var(--text-secondary);
+            font-size: 0.9rem;
+            color: #ffffff;
+            text-transform: uppercase;
         }
 
         .form-group input {
-            background: rgba(10, 14, 23, 0.6);
-            border: 1px solid var(--card-border);
-            border-radius: 10px;
-            padding: 0.85rem 1rem;
-            color: var(--text-primary);
-            font-size: 0.95rem;
+            background: #000000;
+            border: 1px solid #ffffff;
+            padding: 0.8rem 1rem;
+            color: #ffffff;
+            font-size: 1rem;
             outline: none;
-            transition: border-color 0.2s, box-shadow 0.2s;
         }
 
         .form-group input:focus {
-            border-color: var(--accent-cyan);
-            box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.2);
+            background: #111111;
+            border-color: #ffffff;
         }
 
-        .btn-submit {
-            background: var(--accent-gradient);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            padding: 1rem 2rem;
-            font-size: 1rem;
-            font-weight: 600;
+        .btn-execute {
+            background: #ffffff;
+            color: #000000;
+            border: 1px solid #ffffff;
+            padding: 0.9rem 2rem;
+            font-size: 1.05rem;
+            font-weight: 700;
             cursor: pointer;
             width: 100%;
-            transition: transform 0.2s, opacity 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: background 0.1s, color 0.1s;
         }
 
-        .btn-submit:hover {
-            opacity: 0.95;
-            transform: translateY(-2px);
+        .btn-execute:hover {
+            background: #000000;
+            color: #ffffff;
         }
 
-        .loading-container {
-            display: none;
-            text-align: center;
-            padding: 3rem;
-            background: var(--card-bg);
-            border-radius: 16px;
-            margin-bottom: 2rem;
+        /* Persistent Percentage Bar */
+        .progress-bar-wrapper {
+            margin-bottom: 1.5rem;
         }
 
-        .spinner {
-            width: 48px;
-            height: 48px;
-            border: 4px solid rgba(255, 255, 255, 0.1);
-            border-left-color: var(--accent-cyan);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 1rem auto;
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
         }
 
-        @keyframes spin {
-            to { transform: rotate(360deg); }
+        .progress-track {
+            width: 100%;
+            height: 20px;
+            border: 1px solid #ffffff;
+            background: #000000;
+            position: relative;
         }
+
+        .progress-fill {
+            height: 100%;
+            background: #ffffff;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        /* Console Log Window */
+        .console-window {
+            background: #000000;
+            border: 1px solid #ffffff;
+            padding: 1rem;
+            height: 220px;
+            overflow-y: auto;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .console-line {
+            margin-bottom: 0.3rem;
+            color: #cccccc;
+        }
+
+        .console-line.info { color: #ffffff; }
+        .console-line.success { color: #ffffff; font-weight: 700; }
+        .console-line.error { color: #ffffff; text-decoration: underline; }
 
         .dashboard {
             display: none;
@@ -162,83 +214,89 @@
             }
         }
 
-        .output-card {
-            background: var(--card-bg);
-            backdrop-filter: blur(16px);
-            border: 1px solid var(--card-border);
-            border-radius: 16px;
+        .output-panel {
+            background: #000000;
+            border: 1px solid #ffffff;
             padding: 1.5rem;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
         }
 
-        .output-card h2 {
-            font-size: 1.25rem;
+        .output-panel h2 {
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            border-bottom: 1px solid #ffffff;
+            padding-bottom: 0.5rem;
             margin-bottom: 1rem;
-            color: var(--accent-cyan);
         }
 
-        .frame-preview-img {
+        .frame-img {
             width: 100%;
-            border-radius: 12px;
-            border: 1px solid var(--card-border);
+            border: 1px solid #ffffff;
             margin-bottom: 1.5rem;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            display: block;
         }
 
         .metrics-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(2, 1fr);
             gap: 1rem;
+            margin-bottom: 1rem;
         }
 
         .metric-box {
-            background: rgba(10, 14, 23, 0.7);
-            border: 1px solid var(--card-border);
-            padding: 1rem;
-            border-radius: 10px;
+            border: 1px solid #ffffff;
+            padding: 0.8rem;
             text-align: center;
         }
 
-        .metric-box .value {
+        .metric-box .val {
             font-size: 1.1rem;
             font-weight: 700;
-            color: var(--text-primary);
         }
 
-        .metric-box .label {
+        .metric-box .lbl {
             font-size: 0.75rem;
-            color: var(--text-secondary);
+            color: #888888;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-top: 0.25rem;
+            margin-top: 0.2rem;
+        }
+
+        .matched-text-box {
+            border: 1px solid #ffffff;
+            padding: 1rem;
+            background: #111111;
         }
 
         .transcript-box {
-            max-height: 480px;
+            height: 480px;
             overflow-y: auto;
-            padding-right: 0.5rem;
+            border: 1px solid #ffffff;
+            padding: 0.8rem;
         }
 
-        .transcript-item {
-            background: rgba(10, 14, 23, 0.5);
-            border: 1px solid rgba(255, 255, 255, 0.04);
-            border-radius: 8px;
-            padding: 0.75rem 1rem;
-            margin-bottom: 0.75rem;
+        .transcript-row {
+            padding: 0.5rem;
+            border-bottom: 1px solid #222222;
+            font-size: 0.85rem;
             display: flex;
             gap: 1rem;
-            font-size: 0.9rem;
         }
 
-        .transcript-item.matched {
-            border-color: var(--accent-purple);
-            background: rgba(124, 58, 237, 0.15);
+        .transcript-row.active {
+            background: #ffffff;
+            color: #000000;
+            font-weight: 700;
         }
 
-        .transcript-item .ts {
-            color: var(--accent-cyan);
-            font-weight: 600;
-            font-family: monospace;
+        .not-found-banner {
+            border: 1px solid #ffffff;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .transcript-row .ts {
             white-space: nowrap;
         }
     </style>
@@ -246,113 +304,244 @@
 <body>
     <div class="container">
         <header>
-            <h1>Dialogue Frame Finder AI</h1>
-            <p>Locate the exact video frame, timestamp, and visual text from any video URL</p>
+            <h1>Dialogue Frame Finder</h1>
         </header>
 
-        <div class="input-card">
+        <div class="terminal-card">
             <form id="searchForm">
                 <div class="form-grid">
                     <div class="form-group">
-                        <label for="url">Video URL (YouTube, ok.ru, Direct MP4)</label>
-                        <input type="url" id="url" required value="https://ok.ru/video/248244667877" placeholder="https://...">
+                        <label for="url">VIDEO URL / LOCAL FILE PATH</label>
+                        <input type="text" id="url" required placeholder="https://... or C:\path\to\video.mp4" value="https://ok.ru/video/248244667877">
+                        <span style="font-size:0.75rem;color:#666">Paste a URL or a local file path (C:\...\video.mp4)</span>
                     </div>
                     <div class="form-group">
-                        <label for="text">Target Dialogue String</label>
-                        <input type="text" id="text" required value="My mind rebels at stagnation" placeholder="Enter quote or text...">
+                        <label for="text">TARGET DIALOGUE STRING</label>
+                        <input type="text" id="text" required value="My mind rebels at stagnation">
                     </div>
                 </div>
-                <button type="submit" class="btn-submit" id="btnSubmit">Locate Dialogue Frame</button>
+                <div class="form-grid" style="margin-bottom: 1rem;">
+                    <div class="form-group">
+                        <label for="modelSize">WHISPER STT MODEL</label>
+                        <select id="modelSize" style="background:#000;border:1px solid #fff;color:#fff;padding:0.8rem 1rem;font-size:1rem;outline:none;">
+                            <option value="base">base (fast, ~140MB)</option>
+                            <option value="small" selected>small (balanced/accurate, ~460MB)</option>
+                            <option value="medium">medium (high accuracy, ~1.5GB)</option>
+                            <option value="large">large (maximum precision, ~3GB)</option>
+                            <option value="tiny">tiny (fastest fallback, ~75MB)</option>
+                        </select>
+                    </div>
+                </div>
+                <label class="checkbox-row">
+                    <input type="checkbox" id="noSubtitles">
+                    <span>No Subtitles <span class="hint">(skip OCR frame scan)</span></span>
+                </label>
+                <button type="submit" class="btn-execute" id="btnRun">EXECUTE DIALOGUE SEARCH</button>
             </form>
         </div>
 
-        <div class="loading-container" id="loading">
-            <div class="spinner"></div>
-            <h3 style="margin-bottom: 0.5rem;">Analyzing Media Stream...</h3>
-            <p style="color: var(--text-secondary); font-size: 0.9rem;">Transcribing audio track and running visual OCR frame alignment</p>
-        </div>
-
-        <div class="dashboard" id="dashboard">
-            <div class="output-card">
-                <h2>Identified Video Frame Screenshot</h2>
-                <img id="frameImg" class="frame-preview-img" src="" alt="Identified Frame">
-
-                <div class="metrics-grid">
-                    <div class="metric-box">
-                        <div class="value" id="resTimestamp">00:05:25.160</div>
-                        <div class="label">Timestamp</div>
-                    </div>
-                    <div class="metric-box">
-                        <div class="value" id="resFrame">7797</div>
-                        <div class="label">Frame #</div>
-                    </div>
-                    <div class="metric-box">
-                        <div class="value" id="resMatch">Visual Match</div>
-                        <div class="label">Status</div>
-                    </div>
+        <!-- System Progress & Console Output -->
+        <div class="terminal-card">
+            <div class="progress-bar-wrapper">
+                <div class="progress-header">
+                    <span>PROCESSING STATUS</span>
+                    <span id="percentText">0% COMPLETE</span>
                 </div>
-
-                <div style="margin-top: 1.5rem; background: rgba(10, 14, 23, 0.7); border: 1px solid var(--card-border); padding: 1rem; border-radius: 10px;">
-                    <div style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.3rem;">MATCHED DIALOGUE TEXT</div>
-                    <div id="resText" style="font-size: 1.05rem; font-weight: 600; color: #fde047;">"My mind reveals its stagnation."</div>
+                <div class="progress-track">
+                    <div class="progress-fill" id="progressFill"></div>
                 </div>
             </div>
 
-            <div class="output-card">
-                <h2>Full Video Transcript</h2>
-                <div class="transcript-box" id="transcriptList">
-                    <!-- Dynamic transcript items loaded here -->
+            <div class="console-window" id="consoleLog">
+                <div class="console-line">[READY] System idle. Awaiting media URL input...</div>
+            </div>
+        </div>
+
+        <!-- Output Dashboard -->
+        <div class="dashboard" id="dashboard">
+            <div class="output-panel">
+                <h2>CLIP</h2>
+                <video id="clipVideo" controls autoplay muted style="width:100%;border:1px solid #fff;margin-bottom:1.5rem;display:block;background:#000;"></video>
+
+                <h2>CAPTURED FRAME</h2>
+                <img id="frameImg" class="frame-img" src="" alt="Captured Frame Screenshot">
+
+                <div class="metrics-grid" style="grid-template-columns: repeat(4, 1fr);">
+                    <div class="metric-box">
+                        <div class="val" id="resTimestamp">00:00:00.000</div>
+                        <div class="lbl">TIMESTAMP</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="val" id="resFrame">#0</div>
+                        <div class="lbl">FRAME NUMBER</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="val" id="resTotalFrames">0</div>
+                        <div class="lbl">TOTAL FRAMES</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="val" id="resFps">0</div>
+                        <div class="lbl">FRAMERATE (FPS)</div>
+                    </div>
+                </div>
+
+                <div class="matched-text-box">
+                    <div style="font-size: 0.75rem; color: #888888; margin-bottom: 0.3rem;">EXTRACTED MATCHED DIALOGUE TEXT</div>
+                    <div id="resText" style="font-size: 1rem; font-weight: 700;">""</div>
+                </div>
+            </div>
+
+            <div class="output-panel">
+                <h2>TIMESTAMPED TRANSCRIPT EXPORT</h2>
+                <div class="transcript-box" id="transcriptContainer">
+                    <!-- Dynamic Transcript -->
                 </div>
             </div>
         </div>
     </div>
 
     <script>
+        const consoleLog = document.getElementById('consoleLog');
+        const progressFill = document.getElementById('progressFill');
+        const percentText = document.getElementById('percentText');
+
+        function appendLog(msg, type = 'info') {
+            const line = document.createElement('div');
+            line.className = 'console-line ' + type;
+            const now = new Date().toISOString().split('T')[1].slice(0, 8);
+            line.innerText = `[${now}] ${msg}`;
+            consoleLog.appendChild(line);
+            consoleLog.scrollTop = consoleLog.scrollHeight;
+        }
+
+        function setProgress(percent, msg) {
+            progressFill.style.width = percent + '%';
+            percentText.innerText = percent + '% COMPLETE';
+            if (msg) appendLog(msg);
+        }
+
+        const btn = document.getElementById('btnRun');
+
         document.getElementById('searchForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            
+
             const url = document.getElementById('url').value;
             const text = document.getElementById('text').value;
+            const skipOcr = document.getElementById('noSubtitles').checked;
+            const modelSize = document.getElementById('modelSize').value;
 
-            document.getElementById('loading').style.display = 'block';
+            // Reset UI
+            consoleLog.innerHTML = '';
             document.getElementById('dashboard').style.display = 'none';
+            btn.disabled = true;
+            btn.innerText = 'PROCESSING...';
+            setProgress(0, `[START] Initiating search for '${text}'...`);
 
             try {
-                const response = await fetch('/api/find_dialogue', {
+                const response = await fetch('/api/find_dialogue_stream', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ url, text })
+                    body: JSON.stringify({ url, text, skip_ocr: skipOcr, model_size: modelSize })
                 });
 
-                const data = await response.json();
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let buffer = '';
 
-                if (response.ok && data.success) {
-                    document.getElementById('frameImg').src = data.result.image_url + '?t=' + new Date().getTime();
-                    document.getElementById('resTimestamp').innerText = data.result.timestamp;
-                    document.getElementById('resFrame').innerText = '#' + data.result.frame;
-                    document.getElementById('resText').innerText = '"' + data.result.text + '"';
+                while (true) {
+                    const { value, done } = await reader.read();
+                    if (done) break;
 
-                    // Load transcript
-                    const transcriptList = document.getElementById('transcriptList');
-                    transcriptList.innerHTML = '';
+                    buffer += decoder.decode(value, { stream: true });
+                    const lines = buffer.split('\n\n');
+                    buffer = lines.pop(); // keep incomplete last chunk
 
-                    data.result.transcript_segments.forEach(seg => {
-                        const item = document.createElement('div');
-                        item.className = 'transcript-item' + (seg.frame === data.result.frame ? ' matched' : '');
-                        item.innerHTML = `<span class="ts">${seg.timestamp}</span><span>${seg.text}</span>`;
-                        transcriptList.appendChild(item);
-                    });
-
-                    document.getElementById('dashboard').style.display = 'grid';
-                } else {
-                    alert('Error: ' + (data.error || 'Dialogue could not be located in video.'));
+                    for (const line of lines) {
+                        if (line.startsWith('data: ')) {
+                            try {
+                                const data = JSON.parse(line.slice(6));
+                                if (data.type === 'progress') {
+                                    setProgress(data.percent, data.message);
+                                } else if (data.type === 'result') {
+                                    setProgress(100, '[SUCCESS] Dialogue successfully localized!');
+                                    renderResult(data.result);
+                                } else if (data.type === 'not_found') {
+                                    setProgress(100, '[NOT FOUND] Dialogue not located — full transcript returned.');
+                                    renderTranscriptOnly(data.result);
+                                } else if (data.type === 'error') {
+                                    setProgress(100, '[ERROR] ' + data.error);
+                                    appendLog('[ERROR] ' + data.error, 'error');
+                                }
+                            } catch (_) {}
+                        }
+                    }
                 }
             } catch (err) {
-                alert('Connection error: ' + err.message);
+                setProgress(100, '[ERROR] Connection error: ' + err.message);
+                appendLog('[ERROR] ' + err.message, 'error');
             } finally {
-                document.getElementById('loading').style.display = 'none';
+                btn.disabled = false;
+                btn.innerText = 'EXECUTE DIALOGUE SEARCH';
             }
         });
+
+        function renderResult(result) {
+            document.getElementById('frameImg').src = result.image_url + '?t=' + new Date().getTime();
+            
+            const clipVideo = document.getElementById('clipVideo');
+            if (result.clip_url) {
+                clipVideo.src = result.clip_url + '?t=' + new Date().getTime();
+                clipVideo.style.display = 'block';
+            } else {
+                clipVideo.style.display = 'none';
+            }
+
+            document.getElementById('resTimestamp').innerText = result.timestamp;
+            document.getElementById('resFrame').innerText = '#' + result.frame;
+            document.getElementById('resTotalFrames').innerText = (result.total_frames || 0).toLocaleString();
+            document.getElementById('resFps').innerText = (result.fps || 0).toFixed(2);
+            document.getElementById('resText').innerText = '"' + result.text + '"';
+
+            // Show frame panel
+            document.querySelector('.output-panel').style.display = '';
+
+            populateTranscript(result.transcript_segments, result.timestamp, result.frame);
+            document.getElementById('dashboard').style.display = 'grid';
+        }
+
+        function renderTranscriptOnly(result) {
+            // Hide the frame/metrics panel, show only transcript
+            document.querySelector('.output-panel').style.display = 'none';
+
+            const container = document.getElementById('transcriptContainer');
+            container.innerHTML = '<div class="not-found-banner">[!] Dialogue not found &mdash; displaying full transcript below</div>';
+
+            populateTranscript(result.transcript_segments, null, null);
+            document.getElementById('dashboard').style.display = 'grid';
+        }
+
+        function populateTranscript(segments, matchTimestamp, matchFrame) {
+            const container = document.getElementById('transcriptContainer');
+            // Preserve existing banner if renderTranscriptOnly added one
+            const banner = container.querySelector('.not-found-banner');
+            container.innerHTML = '';
+            if (banner) container.appendChild(banner);
+
+            let scrolled = false;
+            segments.forEach(seg => {
+                const row = document.createElement('div');
+                const isActive = matchTimestamp
+                    ? (seg.timestamp === matchTimestamp || seg.frame === matchFrame)
+                    : false;
+                row.className = 'transcript-row' + (isActive ? ' active' : '');
+                row.innerHTML = `<span class="ts">${seg.timestamp}</span><span>${seg.text}</span>`;
+                container.appendChild(row);
+                if (isActive && !scrolled) {
+                    setTimeout(() => row.scrollIntoView({ block: 'center', behavior: 'smooth' }), 300);
+                    scrolled = true;
+                }
+            });
+        }
     </script>
 </body>
 </html>

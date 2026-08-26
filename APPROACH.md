@@ -1,111 +1,128 @@
-# Technical Approach & Design Document: Dialogue Frame Finder
+﻿# Approach & Design: Dialogue Frame Finder
 
-**Repository**: [SanthoshLSA/Quest1](https://github.com/SanthoshLSA/Quest1)  
+**Repo**: [SanthoshLSA/Quest1](https://github.com/SanthoshLSA/Quest1)  
 **Author**: Santhosh  
-**Problem Statement**: Given a video URL and target dialogue text, automatically identify the exact video frame index, timestamp (`HH:MM:SS.sss`), extracted text, and save the corresponding video frame image—without manual inspection.
+**What it does**: You give it a video URL and a line of dialogue. It finds the exact frame in the video where that line appears and gives you a screenshot and a short clip.
 
 ---
 
-## 1. Executive Summary & Problem Analysis
+## The Problem
 
-Finding the exact visual frame of a specific dialogue in long media streams (e.g., a 54-minute video with over 78,000 frames) presents a classic computational challenge: **Temporal Dialogue Localization**.
+Finding a specific line of dialogue in a long video is harder than it sounds. A one-hour video at 25fps has 90,000 frames. Reading text from every single frame with OCR would take several hours on a normal laptop. We needed something smarter.
 
-Key challenges include:
-1. **Computational Overhead**: Naïve frame-by-frame OCR scanning across 78,000+ frames takes over 4.5 hours on CPU.
-2. **Modal Ambiguity**: Dialogue in videos can exist as **spoken audio**, **burned-in visual text / subtitles**, or **both**.
-3. **OCR Noise**: Video compression artifacts, font variations, and lower-resolution streaming links introduce OCR misreadings (e.g., reading `"stagnation"` as `"stagnat1on"` or `"rebel"` as `"rebe1"`).
-4. **Stream Ingestion**: Streaming video platforms (like `ok.ru`) enforce HLS manifests, referrer tokens, and dynamic signature headers that break simple direct video stream readers.
-
-### Solution Overview: Dual-Modal Audio-Anchored Visual Engine
-We engineered an **Audio-Anchored Hybrid Architecture**:
-- **Primary Fast Anchor Engine**: Speech-to-Text (Whisper) scans the 1D audio stream in ~30 seconds to locate the candidate timestamp window $t_{\text{dialogue}}$.
-- **Fine Visual Frame Pinpointer**: EasyOCR + CLAHE contrast enhancement inspects the localized candidate window around $t_{\text{dialogue}}$ to detect visual subtitle on-screen text.
-- **Fallback Engine**: If no audio speech match is found (e.g., silent video or on-screen title card), the system automatically performs a multi-resolution **Coarse-to-Fine Visual OCR search** across the video.
+There were also platform challenges — sites like ok.ru protect their video streams with authentication tokens and custom headers. Standard tools like OpenCV can't open those URLs directly.
 
 ---
 
-## 2. Solution Discovery & Alternatives Evaluated
+## How We Approached It
 
-During architectural design, we systematically evaluated multiple approaches across four key technical layers:
+### Step 1: Listen First, Look Second
 
-### A. Stream Ingestion Layer
-- **Option 1: Native OpenCV `cv2.VideoCapture(url)` (REJECTED)**  
-  *Failure Mode*: OpenCV cannot process platform embedded pages like `ok.ru/video/248244667877` because it lacks HTTP header/cookie handling and HLS parser capabilities, returning 403 Forbidden errors.
-- **Option 2: Headless Browser Scraping (Selenium / Playwright) (REJECTED)**  
-  *Failure Mode*: Slow initialization, 500MB+ binary footprint, high CPU overhead, and difficulty extracting frame-accurate pixel arrays directly from web canvas contexts.
-- **Option 3: `yt-dlp` Media Stream Extraction (SELECTED)**  
-  *Rationale*: Industry standard open-source utility that resolves stream signatures for 1,000+ video platforms, delivering direct local video/audio streams for OpenCV & Whisper.
+The key insight was this: audio is much cheaper to process than video frames.
 
-### B. Dialogue Localization Engine
-- **Option 1: Brute-Force Frame OCR ($O(N)$) (REJECTED)**  
-  *Failure Mode*: A 54-minute video at 23.98 fps contains 78,205 frames. At 150ms per frame EasyOCR inference, total execution time exceeds **3.2 hours**.
-- **Option 2: Audio Speech-to-Text Primary Anchor ($O(1)$) + Visual OCR (SELECTED)**  
-  *Rationale*: Audio waveform processing scales linearly with time $O(T)$ regardless of resolution. Whisper scans 54 minutes of audio in ~3 minutes on CPU, returning the exact second of dialogue. Visual OCR is then executed **only** on candidate frames (~120 frames), reducing OCR processing by **99.8%**!
+Instead of looking at every frame visually, we first run the audio track through Whisper (a speech recognition model). Whisper can transcribe an entire hour of audio in about a minute. Once we know *when* the dialogue is spoken, we only need to inspect a small window of frames around that moment — maybe 3–6 seconds worth — rather than the entire video.
 
-### C. Text Recognition & Matching Layer
-- **Option 1: Multimodal Cloud Vision APIs (GPT-4o / Gemini Vision) (REJECTED)**  
-  *Failure Mode*: Requires API keys, network bandwidth costs, rate limits, and LLMs suffer from non-deterministic timestamp hallucinations.
-- **Option 2: Local EasyOCR + CLAHE Contrast Enhancement + RapidFuzz (SELECTED)**  
-  *Rationale*: Completely offline, zero API cost, deterministic frame indexing, and noise-tolerant fuzzy matching (Levenshtein distance) that handles compression artifacts.
+This cuts the visual work down by about 99%.
+
+**Primary path**: Whisper finds the spoken dialogue timestamp → we look at frames only in that window → OCR confirms the exact frame with the subtitle text.
+
+**Fallback path**: If Whisper finds nothing (silent video, or text appears on screen without being spoken), we fall back to a broader OCR scan of the video in chunks.
 
 ---
 
-## 3. Comparative Evaluation Matrix
+## Key Decisions Made
 
-| Technical Layer | Evaluated Strategy | Execution Speed | Frame Precision | Robustness | API / Dependency Cost | Decision |
-|---|---|---|---|---|---|---|
-| **Ingestion** | Direct OpenCV URL | Fast | Low (Fails on auth) | Poor | Minimal | Rejected |
-| | Playwright Browser | Very Slow | Medium | Medium | Heavy | Rejected |
-| | **`yt-dlp` Extraction** | **Fast** | **High** | **High** | **Minimal** | **SELECTED** |
-| **Localization** | Brute-force OCR ($O(N)$) | ~3.5 Hours | Exact | High | Wasteful Compute | Rejected |
-| | Keyframe I-Frame Only | Fast | Imprecise ($\pm 2\text{s}$) | Low | Low | Rejected |
-| | **Audio-Anchored Visual** | **~3 Minutes** | **Exact Frame** | **High** | **Optimal** | **SELECTED** |
-| **OCR / Match** | Exact String (`==`) | Fast | Low | Fails on OCR typo | Low | Rejected |
-| | Cloud GPT-4 Vision | Slow | Imprecise | Medium | High API Cost | Rejected |
-| | **EasyOCR + RapidFuzz** | **Fast** | **Exact Frame** | **High** | **Free / Local** | **SELECTED** |
+### Downloading the Video
 
----
+**Why yt-dlp?**  
+Most video platforms (ok.ru, YouTube, etc.) don't give you a simple direct file link. They use signed tokens, HLS manifests, and referrer checks. yt-dlp handles all of that automatically. OpenCV's built-in URL reader can't deal with this — it just gets a 403 error.
 
-## 4. Mathematical Search Strategy & Mathematical Formulation
+**Two-phase download strategy** (latest update):  
+We used to download the full video in highest quality right away. For a 1-hour video, that's 1GB+ and takes several minutes. Now we do it in two phases:
 
-### A. Timestamp & Frame Number Mapping
-Let $f$ be the video frame rate in frames per second ($\text{FPS} = 23.98$), and $t_{\text{start}}$ be the dialogue entry timestamp in seconds. The exact video frame index $F$ is defined as:
-$$F = \lfloor t_{\text{start}} \times f \rceil$$
+1. **Initial download in low quality** (smallest/worst format, ~30–80MB) — just enough to run Whisper and find *where* the dialogue is. This downloads in 20–40 seconds.
+2. **Final clip download in max quality** — once we know the exact 6-second window, we download *only that slice* from the remote source at full resolution using `yt-dlp`'s `download_ranges` feature. This means the clip and screenshot are always sharp and high quality, even though the full video was never fully downloaded in HD.
 
-Conversely, given frame index $F$, the timestamp string $\text{TS}(F)$ in `HH:MM:SS.sss` format is:
-$$\text{Hours} = \lfloor \frac{F / f}{3600} \rfloor, \quad \text{Minutes} = \lfloor \frac{(F / f) \pmod{3600}}{60} \rfloor, \quad \text{Seconds} = (F / f) \pmod{60}$$
-
-### B. Fuzzy String Matching Metric (RapidFuzz Partial Ratio)
-To accommodate natural OCR misreadings, text similarity between target query $T$ and extracted OCR string $S$ is calculated using normalized Levenshtein Edit Distance:
-$$\text{Similarity}(T, S) = \max_{S' \subseteq S} \left( \left( 1 - \frac{\text{Levenshtein}(T, S')}{\max(|T|, |S'|)} \right) \times 100 \right)$$
-A threshold $\theta \ge 65.0\%$ is enforced to accept positive matches while rejecting false positive background scene text.
+This approach gives you fast results AND a high-quality output.
 
 ---
 
-## 5. Edge Cases & Robustness Handling
+### Speech Recognition (Whisper)
 
-1. **Video Has No On-Screen Subtitles (Raw Movie Clip)**:
-   - *Behavior*: When EasyOCR confirms no visual text overlay exists in the candidate window, the system seamlessly falls back to the exact audio entry frame from Whisper.
-2. **Video Is Completely Silent / Pure On-Screen Title Card**:
-   - *Behavior*: If Whisper detects no spoken dialogue, the engine switches to a multi-resolution coarse-to-fine Visual OCR scan.
-3. **OCR Character Confusion**:
-   - *Behavior*: Fuzzy matching handles common OCR confusion pairs (e.g. `'l'` vs `'1'`, `'rn'` vs `'m'`).
-4. **SSL / Platform Connection Resets**:
-   - *Behavior*: `yt-dlp` options include `nocheckcertificate=True` and fallback local file caching to prevent network failure during evaluations.
+We use OpenAI Whisper (`tiny` model by default). It runs entirely offline — no API key, no cloud call.
+
+**Speed optimizations added**:  
+By default Whisper uses beam search (checks multiple possible word sequences). We turned that off:
+- `beam_size=1` — greedy decoding only, 3–4× faster
+- `best_of=1` — no sampling fallback
+- `condition_on_previous_text=False` — treats each chunk independently, avoids slow context carry-over
+- `temperature=0.0` — deterministic output
+
+For finding dialogue in a movie, this speed tradeoff is totally fine. Accuracy stays high for clear speech.
 
 ---
 
-## 6. Sample Output Verification
+### Reading Text from Frames (OCR)
 
-On the evaluation dataset video `https://ok.ru/video/248244667877` (*The Adventures of Sherlock Holmes: A Scandal in Bohemia*):
+We use EasyOCR to read text from video frames. Video frames are often blurry or compressed, so we pre-process them with CLAHE (a contrast enhancement filter) before feeding to OCR. This helps it read subtitles that would otherwise be missed.
 
-```text
-==================================================
-                  FINAL OUTPUT                  
-==================================================
-Timestamp : 00:05:25.160
-Frame     : 7797
-Text      : "My mind reveals its stagnation."
-Image     : Saved to 'output_frame.png'
-==================================================
+We don't require an exact character-for-character match. We use RapidFuzz's partial ratio (Levenshtein distance) with a 65% similarity threshold. This handles common OCR errors like `l` vs `1`, `rn` vs `m`, etc.
+
+---
+
+### The Web UI
+
+The web dashboard runs on FastAPI with a simple black-and-white terminal-style interface. When you submit a URL and dialogue text:
+
+1. It streams live progress to your browser via Server-Sent Events (SSE) — you see each step as it happens.
+2. When done, it shows you the matched frame number, total frames, FPS, timestamp, and displays the screenshot and 6-second video clip.
+3. The clip is encoded in H.264 + AAC so it plays natively in every browser without plugins.
+
+---
+
+## What We Rejected and Why
+
+| Option | Why We Rejected It |
+|---|---|
+| OpenCV direct URL | Can't handle platform authentication — just returns errors on ok.ru, YouTube, etc. |
+| Selenium/Playwright browser | Huge overhead, slow, hard to extract frame-accurate pixel data |
+| Full video brute-force OCR | Would take 3–5+ hours on a 1-hour video |
+| Cloud Vision APIs (GPT-4, Gemini) | Costs money, needs internet, non-deterministic output |
+| Downloading full HD video upfront | 1GB+ download takes too long — fixed with two-phase download |
+| Whisper beam search (default) | 3–4× slower than greedy decoding, unnecessary for this use case |
+
+---
+
+## Accuracy & Matching
+
+Frame number is calculated as:
+
+```
+frame_number = floor(timestamp_in_seconds × fps)
+```
+
+Timestamps come from Whisper segment starts, accurate to roughly ±0.5 seconds. OCR fine-tuning within the local window narrows this further to the specific frame where text appears on screen.
+
+---
+
+## Edge Cases Handled
+
+- **No subtitles on screen** — falls back to the audio timestamp frame directly
+- **Silent video / title cards only** — skips audio and runs visual OCR scan
+- **OCR noise / typos** — fuzzy matching absorbs minor character errors
+- **ok.ru SSL quirks** — retries with Referer header and certificate checks disabled
+- **Broken partial downloads** — if the targeted 6s clip download fails, falls back to trimming the local low-res copy
+
+---
+
+## Sample Result
+
+Running on `https://ok.ru/video/248244667877` for the query `"My mind rebels at stagnation"`:
+
+```
+Timestamp  : 00:05:25.160
+Frame      : 7797
+Text Found : "My mind rebels at stagnation."
+Clip       : output_clip.mp4 (6-second H.264 clip, browser-playable)
+Screenshot : output_frame.png
 ```

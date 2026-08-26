@@ -39,7 +39,7 @@ class AudioAligner:
         print(f"[*] Initializing Whisper model ('{model_size}')...")
         self.model = whisper.load_model(model_size)
 
-    def find_spoken_dialogue(self, media_path, target_text, fps=23.98, transcript_txt_path="transcript.txt", transcript_json_path="transcript.json"):
+    def find_spoken_dialogue(self, media_path, target_text, fps=23.98, transcript_txt_path="transcript.txt", transcript_json_path="transcript.json", progress_callback=None):
         """
         Transcribes media file, searches segments for target_text using RapidFuzz,
         saves the ENTIRE transcript to transcript.txt and transcript.json,
@@ -48,8 +48,53 @@ class AudioAligner:
         print(f"[*] Extracting audio waveform from: {media_path}...")
         audio_np = load_audio_numpy(media_path, sr=16000)
         
-        print(f"[*] Transcribing audio ({len(audio_np)/16000:.1f}s) with Whisper...")
-        result = self.model.transcribe(audio_np, verbose=False, fp16=False)
+        duration_sec = len(audio_np) / 16000.0
+        print(f"[*] Transcribing audio ({duration_sec:.1f}s) with Whisper...")
+
+        # Stream live tqdm stats during Whisper transcription
+        class TqdmProgressStream:
+            def __init__(self, callback, duration):
+                self.callback = callback
+                self.duration = duration
+                self.last_pct = -1
+
+            def write(self, text):
+                text = text.strip()
+                if not text or not self.callback:
+                    return
+                # Match tqdm pattern: 39%|███▌     | 22016/55883 [00:21<00:38, 882.20frames/s]
+                import re
+                match = re.search(r"(\d+)%\|.*?\|\s*(\d+)/(\d+)\s*\[([\d:]+)<([\d:]+),\s*([\d.]+frames/s)\]", text)
+                if match:
+                    pct, cur_f, tot_f, elapsed, remaining, speed = match.groups()
+                    pct_val = int(pct)
+                    overall_pct = int(35 + (pct_val / 100.0) * 35) # Map STT 0-100% to overall 35%-70%
+                    msg = f"Transcribing audio: {pct}% | {cur_f}/{tot_f} frames [{elapsed}<{remaining}, {speed}]"
+                    if overall_pct != self.last_pct:
+                        self.last_pct = overall_pct
+                        self.callback(overall_pct, msg)
+
+            def flush(self):
+                pass
+
+        import sys
+        stdout_orig = sys.stderr
+        if progress_callback:
+            sys.stderr = TqdmProgressStream(progress_callback, duration_sec)
+
+        try:
+            result = self.model.transcribe(
+                audio_np,
+                verbose=False,
+                fp16=False,
+                beam_size=1,
+                best_of=1,
+                condition_on_previous_text=False,
+                temperature=0.0
+            )
+        finally:
+            if progress_callback:
+                sys.stderr = stdout_orig
         
         segments = result.get("segments", [])
         full_text = result.get("text", "").strip()

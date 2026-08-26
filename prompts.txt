@@ -1,91 +1,33 @@
-================================================================================
-STEP 1: Architecture Finalization & Environment Setup
-Date/Time: 2026-08-25 12:52 IST
-Prompt Intent: Set Audio Speech-to-Text (Whisper) as the Primary Fast Anchor search engine, with Visual OCR as the fine frame pinpointer and silent-video fallback. Establish repository structure and dependency requirements.
---------------------------------------------------------------------------------
-USER PROMPT:
-"Let me link my GitHub repository https://github.com/SanthoshLSA/Quest1 and push step by step. Proceed with setting up git remote and initial commit."
+STEP 1 - Project Setup & GitHub
+--------------------------------
+Connect the GitHub repo https://github.com/SanthoshLSA/Quest1 and do the initial commit and push.
 
-TECHNICAL CONTEXT & REASONING:
-- Designed a dual-modal search pipeline.
-- Audio STT (Whisper) acts as the fast O(1) anchor search, scanning 1 hour of audio in ~30s.
-- Visual OCR (EasyOCR) pinpoints the exact starting visual frame around the audio timestamp window or acts as a full coarse-to-fine fallback if no spoken audio match is found.
-================================================================================
 
-================================================================================
-STEP 2: Video & Audio Stream Extractor (src/downloader.py)
-Date/Time: 2026-08-25 13:20 IST
-Prompt Intent: Implement media ingestion module using yt-dlp to extract video metadata (FPS, frame count, resolution, duration) and download audio/video tracks for ok.ru and arbitrary streaming links.
---------------------------------------------------------------------------------
-USER PROMPT:
-"Proceed with Step 2. Create src/downloader.py using yt-dlp to handle media URL parsing, extract FPS/resolution/duration metadata, and save local temporary audio/video files for Whisper and OpenCV processing."
+STEP 2 - Video Downloader
+--------------------------
+Build a module that takes any video URL, grabs the video and audio, and pulls out basic info like frame rate, total frames, video length, and resolution.
 
-TECHNICAL CONTEXT & REASONING:
-- yt-dlp bypasses platform authentication headers and stream restrictions on ok.ru.
-- Downloader isolates network logic, ensuring OpenCV and Whisper receive clean local file paths.
-================================================================================
 
-================================================================================
-STEP 3: Primary Audio Alignment Engine (src/audio_aligner.py)
-Date/Time: 2026-08-25 13:30 IST
-Prompt Intent: Build Whisper audio speech-to-text module to transcribe audio and locate exact timestamp where target dialogue is spoken.
---------------------------------------------------------------------------------
-USER PROMPT:
-"Proceed with Step 3. Implement src/audio_aligner.py using OpenAI Whisper to process the video audio track and search for the spoken phrase 'My mind rebels at stagnation', returning the exact start timestamp and corresponding video frame number."
+STEP 3 - Find the Spoken Line
+------------------------------
+Use Whisper to listen through the video audio and find exactly when a specific line of dialogue is spoken. Return the time and the frame number it lands on.
 
-TECHNICAL CONTEXT & REASONING:
-- Fast O(1) temporal anchoring: Scans 54 minutes of audio in ~30 seconds.
-- Uses RapidFuzz token matching to locate phrase entry even under accent or acoustic variation.
-================================================================================
 
-================================================================================
-STEP 4: Targeted Visual OCR & Fine Frame Pinpointer (src/ocr_matcher.py)
-Date/Time: 2026-08-25 13:50 IST
-Prompt Intent: Implement EasyOCR and image preprocessing module to run localized OCR on candidate video frame windows and extract visual text.
---------------------------------------------------------------------------------
-USER PROMPT:
-"Proceed with Step 4. Implement src/ocr_matcher.py using EasyOCR, OpenCV contrast enhancement (CLAHE), and RapidFuzz to inspect frames around the candidate timestamp window, returning exact visual frame index and extracted text."
+STEP 4 - Read Text from the Frame
+-----------------------------------
+Once we have the rough timestamp, look at the frames around it and use OCR to read any on-screen text. Find the exact frame where the dialogue appears visually.
 
-TECHNICAL CONTEXT & REASONING:
-- Localized target window OCR avoids wasting compute on full 108,000 video frames.
-- Applies image preprocessing to maximize OCR accuracy on compressed video subtitles.
-================================================================================
 
-================================================================================
-STEP 5: Main CLI Orchestrator & Frame Output (main.py)
-Date/Time: 2026-08-25 14:09 IST
-Prompt Intent: Build main entrypoint CLI script to coordinate downloader, audio aligner, and OCR matcher, and output formatted timestamp, frame number, dialogue text, and saved frame image.
---------------------------------------------------------------------------------
-USER PROMPT:
-"Proceed with Step 5. Implement main.py to tie together the downloader, audio aligner, and OCR matcher into a unified command line tool, outputting the required format and saving output_frame.png."
+STEP 5 - Tie It All Together
+------------------------------
+Build the main script that runs everything in order: download, listen, find, confirm, and save the matching frame as an image.
 
-TECHNICAL CONTEXT & REASONING:
-- Provides clean CLI flags (--url and --target_text).
-- Orchestrates primary audio alignment + visual OCR verification + frame extraction.
-================================================================================
 
-================================================================================
-STEP 6: Documentation & Evaluation Deliverables (APPROACH.md, README.md)
-Date/Time: 2026-08-25 14:34 IST
-Prompt Intent: Write publication-grade APPROACH.md detailing design, mathematical formulation, discovery journey, candidate evaluation matrix, and edge case handling, along with clear README.md.
---------------------------------------------------------------------------------
-USER PROMPT:
-"Proceed with Step 6. Create comprehensive APPROACH.md and README.md documents detailing the entire engineering thought process, trade-off matrix, mathematical formulas, and instructions to run the solution."
+STEP 6 - Write the Docs
+-------------------------
+Write a clear README explaining how to run the tool, and an APPROACH document explaining how the whole thing works and why it was built this way.
 
-TECHNICAL CONTEXT & REASONING:
-- Satisfies all submission requirements for GitHub evaluation.
-- Equips the candidate with complete technical defense material for the interview.
-================================================================================
 
-================================================================================
-STEP 7: Local Web Application UI (app.py & static/index.html)
-Date/Time: 2026-08-25 21:00 IST
-Prompt Intent: Build a premium local Web Application using FastAPI/Flask and modern glassmorphism UI to accept video URL and text, run the detection pipeline, and display extracted video screenshot frame, timestamp, frame number, and full transcript on a single dashboard page.
---------------------------------------------------------------------------------
-USER PROMPT:
-"And I want to make a web app which is run locally where I run this application where I can give video link and text to find and it will find and give all outputs in same page."
-
-TECHNICAL CONTEXT & REASONING:
-- Implements FastAPI server wrapping the Python detection engine.
-- Serves an interactive dark-mode dashboard showcasing screenshot image, exact frame/timestamp metrics, and searchable video transcript.
-================================================================================
+STEP 7 - Web Dashboard
+------------------------
+Add a web interface where you paste a URL and a line of dialogue, hit go, and watch live progress updates as it searches. Show the result with the matching frame screenshot and a short video clip. Keep the design black and white, terminal style.
