@@ -1,8 +1,9 @@
-opencv-python
+﻿opencv-python
 yt-dlp
 easyocr
 rapidfuzz
 openai-whisper
+faster-whisper
 pillow
 numpy
 imageio-ffmpeg

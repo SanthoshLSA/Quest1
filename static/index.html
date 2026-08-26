@@ -510,13 +510,31 @@
         }
 
         function renderTranscriptOnly(result) {
-            // Hide the frame/metrics panel, show only transcript
             document.querySelector('.output-panel').style.display = 'none';
 
             const container = document.getElementById('transcriptContainer');
-            container.innerHTML = '<div class="not-found-banner">[!] Dialogue not found &mdash; displaying full transcript below</div>';
+            let html = '<div class="not-found-banner">[!] Dialogue not found in this video.</div>';
 
-            populateTranscript(result.transcript_segments, null, null);
+            // Show closest matches if available
+            const candidates = result.candidates || [];
+            if (candidates.length > 0) {
+                html += '<div style="margin:1rem 0 0.5rem;color:#aaa;font-size:0.85rem;">CLOSEST MATCHES FOUND:</div>';
+                candidates.forEach(c => {
+                    html += `<div style="border:1px solid #444;padding:0.5rem 0.75rem;margin-bottom:0.4rem;font-size:0.85rem;">
+                        <span style="color:#fff;">[${Math.round(c.score)}% match]</span>
+                        &nbsp;<span style="color:#ccc;">"${c.text}"</span>
+                        &nbsp;<span style="color:#666;">${c.timestamp} &mdash; frame ${c.frame}</span>
+                    </div>`;
+                });
+            }
+
+            // Show hint if available
+            if (result.hint) {
+                html += `<div style="margin:0.75rem 0;color:#888;font-size:0.82rem;border-left:2px solid #555;padding-left:0.75rem;">${result.hint}</div>`;
+            }
+
+            container.innerHTML = html;
+            populateTranscript(result.transcript_segments || [], null, null);
             document.getElementById('dashboard').style.display = 'grid';
         }
 

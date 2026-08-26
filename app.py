@@ -102,6 +102,10 @@ def api_find_dialogue_stream(req: SearchRequest):
                     "type": "not_found",
                     "result": {
                         "transcript_segments": transcript_segments,
+                        "candidates": res.get("candidates", []),
+                        "hint": res.get("hint", ""),
+                        "total_frames": res.get("total_frames", 0),
+                        "fps": res.get("fps", 0),
                     }
                 })
         except Exception as e:

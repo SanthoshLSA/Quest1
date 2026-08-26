@@ -168,14 +168,26 @@ def find_dialogue_frame(video_url, target_text, output_img="output_frame.png", t
         final_result["fps"] = fps
         return final_result
     else:
-        update_progress(100, f"Dialogue not found — returning full transcript anyway.")
-        print(f"\n[!] Dialogue \"{target_text}\" could not be located in video.")
-        print(f"[+] Full transcript still available at '{transcript_txt}'")
+        candidates = audio_res.get("candidates", [])
+        hint = audio_res.get("hint", "")
+        update_progress(100, f"Dialogue not found in video.")
+        print(f"\n[!] Dialogue \"{target_text}\" could not be located.")
+        if candidates:
+            print(f"[*] Closest matches found:")
+            for c in candidates:
+                print(f"    [{c['score']:.0f}%] \"{c['text']}\" at {c['timestamp']} (frame {c['frame']})")
+        print(f"[+] Full transcript saved to '{transcript_txt}'")
+        if hint:
+            print(f"[*] Hint: {hint}")
         return {
             "found": False,
             "timestamp": None,
             "frame": None,
             "text": None,
+            "candidates": candidates,
+            "hint": hint,
+            "total_frames": total_frames,
+            "fps": fps,
         }
 
 
